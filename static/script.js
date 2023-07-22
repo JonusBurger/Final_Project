@@ -45,7 +45,6 @@ class Snake {
         context.fillStyle = 'white';
         // append new position to beginning of body array
         this.body.unshift({x: this.x, y: this.y});
-        console.log(this.body)
         //draw rest of Body
         for (let i = 0; i < this.body.length; i++){
             if (i == (this.body.length - 1) && i > 0){
@@ -88,6 +87,15 @@ class Snake {
             return true;
         }
     }
+    fail_condition(){
+        // search array of body and checks if current position is found (excluding first entry of body)
+        if (this.body.slice(1,this.body.length).find(entry => (entry.x === this.x && entry.y === this.y))){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 };
 
 
@@ -98,7 +106,9 @@ class Food {
         while (spawned == false){
             this.x = Math.floor(Math.random() * (canvas.width - GAME_SIZE) / GAME_SIZE) * GAME_SIZE;
             this.y = Math.floor(Math.random() * (canvas.height - GAME_SIZE) / GAME_SIZE) * GAME_SIZE;
-            if (!snake.body.includes({x: this.x, y: this.y})){
+            // Condition to check if item was spawned at a snake body position
+            console.log(!snake.body.find(entry => (entry.x === this.x && entry.y === this.y)));
+            if (!snake.body.find(entry => (entry.x === this.x && entry.y === this.y))){
                 spawned = true;
             }
         }
@@ -128,6 +138,9 @@ function animate(){
             food = new Food(snake);
             food.draw(ctx);
             snake.body.push(snake.body[snake.body.length -1]) // Increase Body of Snake
+        }
+        if (snake.fail_condition()){
+            return;
         }
     }
     counter++;
