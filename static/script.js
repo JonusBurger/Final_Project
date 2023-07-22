@@ -3,7 +3,7 @@ const ctx = canvas.getContext('2d');
 const CANVAS_WIDTH = canvas.width = 400;
 const CANVAS_HEIGHT = canvas.height = 400;
 const GAME_SIZE = 10; // Defines sizes of Object in the game
-let game_speed = 5;
+let game_speed = 5; // Defines Game_speed 
 
 // Handler Listening for User-Input
 class InputHandler {
@@ -22,7 +22,6 @@ class InputHandler {
             if (e.key === 'ArrowRight'){
                 this.key = 'right'            
             }   
-        // console.log(this.key); 
         });
     }
 }
@@ -64,7 +63,7 @@ class Snake {
         } else if (input.key === 'up'){
             this.y -= this.step_size;
             if (this.y < 0){
-                this.y = CANVAS_HEIGHT;
+                this.y = CANVAS_HEIGHT - GAME_SIZE; //Minus to ensure not outside of Canvas
             }
         } else if (input.key === 'right'){
             this.x += this.step_size;
@@ -74,13 +73,12 @@ class Snake {
         } else if (input.key === 'left'){
             this.x -= this.step_size;
             if (this.x < 0){
-                this.x = CANVAS_WIDTH;
+                this.x = CANVAS_WIDTH - GAME_SIZE; //Minus to ensure not outside of Canvas
             }
         }
     }
     check_contact(item){
-        if ((this.y + this.width) < item.y || this.y > (item.y + item.width) ||
-            (this.x + this.height) < item.x || this.x > (item.x + item.height)){
+        if (this.y != item.y || this.x != item.x){
                 return false;
         }
         else{
@@ -107,7 +105,6 @@ class Food {
             this.x = Math.floor(Math.random() * (canvas.width - GAME_SIZE) / GAME_SIZE) * GAME_SIZE;
             this.y = Math.floor(Math.random() * (canvas.height - GAME_SIZE) / GAME_SIZE) * GAME_SIZE;
             // Condition to check if item was spawned at a snake body position
-            console.log(!snake.body.find(entry => (entry.x === this.x && entry.y === this.y)));
             if (!snake.body.find(entry => (entry.x === this.x && entry.y === this.y))){
                 spawned = true;
             }
@@ -131,7 +128,6 @@ function animate(){
     if (counter % game_speed == 0){
         ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         snake.draw(ctx);
-        snake.update(input);
         food.draw(ctx)
         // Checks if snake touches Food
         if (snake.check_contact(food)){
@@ -139,6 +135,8 @@ function animate(){
             food.draw(ctx);
             snake.body.push(snake.body[snake.body.length -1]) // Increase Body of Snake
         }
+        snake.update(input);
+        // Check if Snake Head touches Body
         if (snake.fail_condition()){
             return;
         }
