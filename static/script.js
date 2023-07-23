@@ -3,7 +3,7 @@ const ctx = canvas.getContext('2d');
 const CANVAS_WIDTH = canvas.width = 400;
 const CANVAS_HEIGHT = canvas.height = 400;
 const GAME_SIZE = 10; // Defines sizes of Object in the game
-let game_speed = 5; // Defines Game_speed 
+let game_speed = 10; // Defines Game_speed 
 
 // Handler Listening for User-Input
 class InputHandler {
@@ -31,6 +31,8 @@ class InputHandler {
 // alle anderen neben den Wert des vorherigen Arrays an
 
 
+
+// Snake is the class of the player object
 class Snake {
     constructor(CANVAS_WIDTH, CANVAS_HEIGHT){
         this.x = Math.floor(CANVAS_WIDTH/(2*GAME_SIZE)) * GAME_SIZE;
@@ -97,6 +99,7 @@ class Snake {
 };
 
 
+// Food is the class of items spawned in the game
 class Food {
     constructor(snake){
         let spawned = false;
@@ -124,8 +127,9 @@ const snake = new Snake(CANVAS_WIDTH, CANVAS_HEIGHT);
 let food = new Food(snake);
 let counter = 0;
 
+
 function animate(){
-    if (counter % game_speed == 0){
+    if ( counter % game_speed == 0){
         ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         snake.draw(ctx);
         food.draw(ctx)
