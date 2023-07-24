@@ -3,7 +3,8 @@ const ctx = canvas.getContext('2d');
 const CANVAS_WIDTH = canvas.width = 400;
 const CANVAS_HEIGHT = canvas.height = 400;
 const GAME_SIZE = 10; // Defines sizes of Object in the game
-let game_speed = 10; // Defines Game_speed 
+let game_speed = 10; // Defines Game_speed
+let score = 0; // stores the Score for the current game 
 
 // Handler Listening for User-Input
 class InputHandler {
@@ -82,6 +83,8 @@ class Snake {
                 return false;
         }
         else{
+            score++; // increases score everytime an item is touched
+            document.getElementById("score").innerHTML = score; // changes score on html side
             return true;
         }
     }
@@ -134,9 +137,10 @@ let counter = 0;
 let stats = 0;
 
 
+// Enables Game Over window & resets score
 function game_over(){
     Hide("button_go", false);
-    console.log("hello world!");
+    document.getElementById("score").innerHTML = 0; // changes score on html side
 }
 
 
@@ -181,6 +185,7 @@ function run_game(){
     snake = new Snake(CANVAS_WIDTH, CANVAS_HEIGHT);
     food = new Food(snake);
     counter = 0;
+    score = 0;
     // starts main game loop
     animate();
 };

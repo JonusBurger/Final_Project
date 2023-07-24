@@ -8,6 +8,52 @@
     height: 400px;
 }
 
+.main_div {
+    display: none;
+    background-color: black;
+    color: white;
+    font: Serif; 
+}
+
+
+.form_style {
+    background-color: black;
+    color: white;
+    font: Serif;
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+}
+
+.score_style {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 480px;
+    vertical-align: top;
+    text-align: left;
+    padding: 15px 32px;
+}
+
+.user_style {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 480px;
+    vertical-align: top;
+    text-align: right;
+    padding: 15px 32px;
+    background-color: black;
+    color: white;
+    font: Serif;
+}
+
 .button1_style {
     margin: 0;
     position: absolute;

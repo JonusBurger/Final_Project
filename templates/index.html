@@ -9,10 +9,13 @@
         SNAKE
     </div>
     <h2 class="main">This was CS50!</h2>
+    {% if username is defined %}
+    <p class="user_style">Currently Playing as {{ username }}</p>
     <div>
         <button class="button1_style" id="button_st" onclick="run_game()">Start the Game!</button>
     </div>
-    <div style="display: none", id="div_canvas">
+    <div class="main_div" id="div_canvas">
+        <p class="score_style">Score: <em id="score" style="font : Serif">0</em></p>
         <canvas class="canvas_style" id="canvas1"></canvas>
     </div>
     <div>
@@ -21,6 +24,12 @@
         <p class="button2_style" id="button_pa">Game Paused! <br> 
             <span style="font-size: 10px"> Press Arrow-key to resume </span></p>
     </div>
+    {% else %}
+    <form action="/login" method ="post" class="form_style">
+        <label>Enter Name:</label>
+        <input type="text" name="user" autofocus>
+    </form>
+    {% endif %}
     <script type=text/javascript src="{{
         url_for('static', filename='script.js')
       }}"></script>
