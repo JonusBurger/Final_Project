@@ -2,15 +2,24 @@
 
 {% block title %}
     Snake Game
-{% endblock %}
+{% endblock %}!
 
 {% block main %}
     <div class="header">
-        SNAKE GAME
+        SNAKE
     </div>
     <h2 class="main">This was CS50!</h2>
     <div>
+        <button class="button1_style" id="button_st" onclick="run_game()">Start the Game!</button>
+    </div>
+    <div style="display: none", id="div_canvas">
         <canvas class="canvas_style" id="canvas1"></canvas>
+    </div>
+    <div>
+        <button class="button2_style" id="button_go" onclick="run_game()">Game Over! <br> 
+            <span style="font-size: 10px"> Press here to start again </span></button>
+        <p class="button2_style" id="button_pa">Game Paused! <br> 
+            <span style="font-size: 10px"> Press Arrow-key to resume </span></p>
     </div>
     <script type=text/javascript src="{{
         url_for('static', filename='script.js')
