@@ -3,7 +3,7 @@ const ctx = canvas.getContext('2d');
 const CANVAS_WIDTH = canvas.width = 400;
 const CANVAS_HEIGHT = canvas.height = 400;
 const GAME_SIZE = 10; // Defines sizes of Object in the game
-let game_speed = 5; // Defines Game_speed 
+let game_speed = 10; // Defines Game_speed 
 
 // Handler Listening for User-Input
 class InputHandler {
@@ -21,16 +21,16 @@ class InputHandler {
             }
             if (e.key === 'ArrowRight'){
                 this.key = 'right'            
+            }
+            if (e.key == 'Escape'){
+                this.key = 'esc';
             }   
         });
     }
 }
 
-// Idee Array mit Körperpositionen
-// bei neuem Draw nimmt ändert Kopf Position
-// alle anderen neben den Wert des vorherigen Arrays an
 
-
+// Snake is the class of the player object
 class Snake {
     constructor(CANVAS_WIDTH, CANVAS_HEIGHT){
         this.x = Math.floor(CANVAS_WIDTH/(2*GAME_SIZE)) * GAME_SIZE;
@@ -97,6 +97,7 @@ class Snake {
 };
 
 
+// Food is the class of items spawned in the game
 class Food {
     constructor(snake){
         let spawned = false;
@@ -116,34 +117,70 @@ class Food {
         context.fillStyle = 'white';
         context.fillRect(this.x, this.y, this.width, this.height);
     }
-}
+};
+
+
+// Function for toggeling elements on and off
+function Hide(elementid, toggle) {
+    let element = document.getElementById(elementid);
+    element.style.display = ( toggle ) ? "none" : "block";
+};
 
 
 const input = new InputHandler();
-const snake = new Snake(CANVAS_WIDTH, CANVAS_HEIGHT);
+let snake = new Snake(CANVAS_WIDTH, CANVAS_HEIGHT);
 let food = new Food(snake);
 let counter = 0;
+let stats = 0;
 
-function animate(){
+
+function game_over(){
+    Hide("button_go", false);
+    console.log("hello world!");
+}
+
+
+async function animate(){
     if (counter % game_speed == 0){
-        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        snake.draw(ctx);
-        food.draw(ctx)
-        // Checks if snake touches Food
-        if (snake.check_contact(food)){
-            food = new Food(snake);
-            food.draw(ctx);
-            snake.body.push(snake.body[snake.body.length -1]) // Increase Body of Snake
+        // Condition to enable Pause-function
+        if (input.key == 'esc'){
+            Hide("button_pa", false);
         }
-        snake.update(input);
-        // Check if Snake Head touches Body
-        if (snake.fail_condition()){
-            return;
+        else {
+            Hide("button_pa", true);
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            snake.draw(ctx);
+            food.draw(ctx)
+            // Checks if snake touches Food
+            if (snake.check_contact(food)){
+                food = new Food(snake);
+                food.draw(ctx);
+                snake.body.push(snake.body[snake.body.length -1]) // Increase Body of Snake
+            }
+            snake.update(input);
+            // Check if Snake Head touches Body
+            if (snake.fail_condition()){
+                game_over();
+                return;
+            }
         }
     }
     counter++;
     requestAnimationFrame(animate);
 };
 
-
-animate();
+// Main function for running the game
+function run_game(){
+    // Hidding Buttons
+    Hide("button_st", true);
+    Hide("button_go", true);
+    // Display Canvas
+    Hide("div_canvas", false);
+    // initalizes classes and objects
+    input.key = ''; // resets value of event handler
+    snake = new Snake(CANVAS_WIDTH, CANVAS_HEIGHT);
+    food = new Food(snake);
+    counter = 0;
+    // starts main game loop
+    animate();
+};

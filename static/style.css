@@ -8,6 +8,36 @@
     height: 400px;
 }
 
+.button1_style {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: black;
+    border: 1px solid white;
+    color: white;
+    font: Serif;
+    padding: 15px 32px;
+    font-size: 16px;
+}
+
+
+.button2_style {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: transparent;
+    border: none;
+    color: white;
+    font: Serif;
+    font-size: 16px;
+    outline: none;
+    display: none;
+}
+
 .main_style {
     background-color: black;
 }
