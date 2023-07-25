@@ -15,6 +15,11 @@
     font: Serif; 
 }
 
+.bottom_side {
+    position:absolute;
+    bottom:-15%;
+    text-align: center;
+}
 
 .form_style {
     background-color: black;
@@ -97,5 +102,11 @@
     font: Serif;
     font-size: xx-large;
     text-align: center;
-    vertical-align: middle;
+    
+}
+
+.footer {
+    text-align: right;
+    vertical-align: bottom;
+    color: #6c757d;
 }

@@ -12,15 +12,19 @@ class InputHandler {
         this.key = '';
         window.addEventListener('keydown', e => {
             if (e.key === 'ArrowDown'){
+                e.preventDefault(); // prevents scrolling from occuring
                 this.key = 'down'            
             }
             if (e.key === 'ArrowUp'){
+                e.preventDefault();
                 this.key = 'up'            
             }
             if (e.key === 'ArrowLeft'){
+                e.preventDefault();
                 this.key = 'left'            
             }
             if (e.key === 'ArrowRight'){
+                e.preventDefault();
                 this.key = 'right'            
             }
             if (e.key == 'Escape'){
@@ -123,6 +127,17 @@ class Food {
 };
 
 
+// Function for sending Score to Backend
+function sendInfo() {
+    const request = new XMLHttpRequest()
+    request.open('POST', `/process/${JSON.stringify(score)}`)
+    request.onload = () => {
+        const flaskMessage = request.responseText
+        console.log(flaskMessage)
+    }
+    request.send()
+};
+
 // Function for toggeling elements on and off
 function Hide(elementid, toggle) {
     let element = document.getElementById(elementid);
@@ -139,6 +154,7 @@ let stats = 0;
 
 // Enables Game Over window & resets score
 function game_over(){
+    sendInfo();
     Hide("button_go", false);
     document.getElementById("score").innerHTML = 0; // changes score on html side
 }
