@@ -11,7 +11,10 @@
     {% if username is defined %}
     <p class="user_style">Currently Playing as {{ username }}</p>
     <div>
-        <button class="button1_style" id="button_st" onclick="run_game()">Start the Game!</button>
+        <button class="button_start" id="button_st" onclick="run_game()">Start the Game!</button>
+        <form action="/change" method ="post">
+            <input type="submit" class="button_change" id="button_ch" value="Change Name">
+        </form>
     </div>
     <div class="main_div" id="div_canvas">
         <p class="score_style">Score: <em id="score" style="font : Serif">0</em></p>
@@ -24,10 +27,16 @@
         </button>
         <p class="button2_style" id="button_pa">
             Game Paused! <br> 
-            <span style="font-size: 10px"> Press Arrow-key to resume </span>
+            <span style="font-size: 10px"> Press Arrow-key to resume <br> Press Backspace to go back to Main Menu</span>
         </p>
     </div>
     {% else %}
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-warning" style="text-align: center;">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {{ message }}
+    </div>
+    {% endfor %}
     <form action="/login" method ="post" class="form_style">
         <label>Enter Name:</label>
         <input type="text" name="user" autofocus>

@@ -59,17 +59,31 @@
     font: Serif;
 }
 
-.button1_style {
+.button_start {
     margin: 0;
     position: absolute;
-    top: 50%;
+    top: 47%;
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: black;
     border: 1px solid white;
     color: white;
     font: Serif;
-    padding: 15px 32px;
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+.button_change {
+    margin: 0;
+    position: absolute;
+    top: 54%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: black;
+    border: 1px solid white;
+    color: white;
+    font: Serif;
+    padding: 10px 24px;
     font-size: 16px;
 }
 
