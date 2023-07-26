@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, session, request
+from flask import Flask, render_template, redirect, session, request, flash
 from flask_session import Session
 import json
 import sqlite3
@@ -33,7 +33,14 @@ def login():
         session.clear()
 
         # Remember user
-        session["user"] = request.form.get("user")
+        username = request.form.get("user")
+        if not username:
+            flash("Enter a Playername!")
+            return redirect("/")
+        elif len(username) > 15:
+            flash("Playername is to long")
+            return redirect("/")
+        session["user"] = username
     return redirect("/")
 
 # method for storing score of user in scores.db
@@ -43,4 +50,9 @@ def processInfo(score):
     db.execute("INSERT INTO score (user, score) VALUES (?,?);",[session["user"], score])
     connection.commit()
     return f'Score {score} added to database'
+
+@app.route("/change", methods=["POST"])
+def name_change():
+    session.clear()
+    return redirect("/")
 

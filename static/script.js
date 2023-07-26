@@ -5,31 +5,28 @@ const CANVAS_HEIGHT = canvas.height = 400;
 const GAME_SIZE = 10; // Defines sizes of Object in the game
 let game_speed = 10; // Defines Game_speed
 let score = 0; // stores the Score for the current game 
+let mvmt_occured = true; // variable storing if a mvmt was applied or not
+let backspace_enabled = false; // this is used in order to enable going back to main menu
+const allowed_mvmt = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight']; // Defines mvmt controlls
+const allowed_options = ['Escape', 'Backspace']; // Defines option controlls
 
 // Handler Listening for User-Input
 class InputHandler {
     constructor(){
         this.key = '';
         window.addEventListener('keydown', e => {
-            if (e.key === 'ArrowDown'){
-                e.preventDefault(); // prevents scrolling from occuring
-                this.key = 'down'            
+            e.preventDefault(); // prevents scrolling from occuring
+            if (mvmt_occured && e.key != this.key){  // prevents mvmt from registring before older mvmt was applied
+                // checks if pressed key is part of mvmt controlls
+                if (allowed_mvmt.includes(e.key)){
+                    this.key = e.key;
+                    mvmt_occured = false; 
+                } 
+                // checks if pressed key is part of option controlls
+                else if (allowed_options.includes(e.key)){
+                    this.key = e.key;
+                }
             }
-            if (e.key === 'ArrowUp'){
-                e.preventDefault();
-                this.key = 'up'            
-            }
-            if (e.key === 'ArrowLeft'){
-                e.preventDefault();
-                this.key = 'left'            
-            }
-            if (e.key === 'ArrowRight'){
-                e.preventDefault();
-                this.key = 'right'            
-            }
-            if (e.key == 'Escape'){
-                this.key = 'esc';
-            }   
         });
     }
 }
@@ -59,28 +56,35 @@ class Snake {
             }
         }
     }
-    update(input){ 
-        if (input.key === 'down'){
-            this.y += this.step_size;
-            if (this.y >= CANVAS_HEIGHT){
-                this.y = 0;
-            }
-        } else if (input.key === 'up'){
-            this.y -= this.step_size;
-            if (this.y < 0){
-                this.y = CANVAS_HEIGHT - GAME_SIZE; //Minus to ensure not outside of Canvas
-            }
-        } else if (input.key === 'right'){
-            this.x += this.step_size;
-            if (this.x >= CANVAS_WIDTH){
-                this.x = 0;
-            }
-        } else if (input.key === 'left'){
-            this.x -= this.step_size;
-            if (this.x < 0){
-                this.x = CANVAS_WIDTH - GAME_SIZE; //Minus to ensure not outside of Canvas
-            }
+    update(input){
+        switch (input.key) {
+            case 'ArrowDown':
+                this.y += this.step_size;
+                if (this.y >= CANVAS_HEIGHT){
+                    this.y = 0;
+                }
+                break;
+            case 'ArrowUp':
+                this.y -= this.step_size;
+                if (this.y < 0){
+                    this.y = CANVAS_HEIGHT - GAME_SIZE; //Minus to ensure not outside of Canvas
+                }
+                break;
+            case 'ArrowRight':
+                this.x += this.step_size;
+                if (this.x >= CANVAS_WIDTH){
+                    this.x = 0;
+                }
+                break;
+            case 'ArrowLeft':
+                this.x -= this.step_size;
+                if (this.x < 0){
+                    this.x = CANVAS_WIDTH - GAME_SIZE; //Minus to ensure not outside of Canvas
+                }
+            default:
+                break;
         }
+        mvmt_occured = true;
     }
     check_contact(item){
         if (this.y != item.y || this.x != item.x){
@@ -163,14 +167,26 @@ function game_over(){
 async function animate(){
     if (counter % game_speed == 0){
         // Condition to enable Pause-function
-        if (input.key == 'esc'){
+        if (input.key == 'Escape'){
             Hide("button_pa", false);
+            backspace_enabled = true;
         }
-        else {
-            Hide("button_pa", true);
+        // Condition for going back to main Menu
+        else if (backspace_enabled && (input.key === 'Backspace')){
+            end_game();
+            return;
+        }
+        else if (allowed_mvmt.includes(input.key)){
+            // Open Bug handles Backspace pauses the game
+            //
+            //
+            //
+            // FIX
+            backspace_enabled = false; // disables backspace for jumping to main menu
+            Hide("button_pa", true); // hides pause button
             ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             snake.draw(ctx);
-            food.draw(ctx)
+            food.draw(ctx);
             // Checks if snake touches Food
             if (snake.check_contact(food)){
                 food = new Food(snake);
@@ -194,6 +210,7 @@ function run_game(){
     // Hidding Buttons
     Hide("button_st", true);
     Hide("button_go", true);
+    Hide("button_ch", true);
     // Display Canvas
     Hide("div_canvas", false);
     // initalizes classes and objects
@@ -202,6 +219,20 @@ function run_game(){
     food = new Food(snake);
     counter = 0;
     score = 0;
+    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); // clears canvas (If Game was run before)
+    snake.draw(ctx); // Draws objects before animation loop is started
+    food.draw(ctx); // Draws objects before animation loop is started
     // starts main game loop
     animate();
+};
+
+// Function for Handeling end of a Game
+function end_game(){
+    // display main menu buttons
+    Hide("button_st", false);
+    Hide("button_ch", false);
+    // disable canvas and pause button
+    Hide("div_canvas", true);    
+    Hide("button_pa", true);
+    document.getElementById("score").innerHTML = 0; // changes score on html side
 };
