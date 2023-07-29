@@ -8,7 +8,7 @@ let score = 0; // stores the Score for the current game
 let mvmt_occured = true; // variable storing if a mvmt was applied or not
 let backspace_enabled = false; // this is used in order to enable going back to main menu
 const allowed_mvmt = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight']; // Defines mvmt controlls
-const allowed_options = ['Escape', 'Backspace']; // Defines option controlls
+const allowed_options = ['Escape']; // Defines option controlls
 
 // Handler Listening for User-Input
 class InputHandler {
@@ -24,6 +24,9 @@ class InputHandler {
                 } 
                 // checks if pressed key is part of option controlls
                 else if (allowed_options.includes(e.key)){
+                    this.key = e.key;
+                }
+                else if (e.key === 'Backspace' && backspace_enabled){
                     this.key = e.key;
                 }
             }
@@ -172,16 +175,11 @@ async function animate(){
             backspace_enabled = true;
         }
         // Condition for going back to main Menu
-        else if (backspace_enabled && (input.key === 'Backspace')){
+        else if (input.key === 'Backspace'){
             end_game();
             return;
         }
         else if (allowed_mvmt.includes(input.key)){
-            // Open Bug handles Backspace pauses the game
-            //
-            //
-            //
-            // FIX
             backspace_enabled = false; // disables backspace for jumping to main menu
             Hide("button_pa", true); // hides pause button
             ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
