@@ -5,8 +5,10 @@ const CANVAS_HEIGHT = canvas.height = 400;
 const GAME_SIZE = 10; // Defines sizes of Object in the game
 let game_speed = 10; // Defines Game_speed
 let score = 0; // stores the Score for the current game 
+let counter = 0; // Keeps track of current Frame
 let mvmt_occured = true; // variable storing if a mvmt was applied or not
 let backspace_enabled = false; // this is used in order to enable going back to main menu
+let game_lost = false;
 const allowed_mvmt = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight']; // Defines mvmt controlls
 const allowed_options = ['Escape']; // Defines option controlls
 
@@ -14,23 +16,22 @@ const allowed_options = ['Escape']; // Defines option controlls
 class InputHandler {
     constructor(){
         this.key = '';
-        window.addEventListener('keydown', e => {
-            e.preventDefault(); // prevents scrolling from occuring
-            if (mvmt_occured && e.key != this.key){  // prevents mvmt from registring before older mvmt was applied
-                // checks if pressed key is part of mvmt controlls
-                if (allowed_mvmt.includes(e.key)){
-                    this.key = e.key;
-                    mvmt_occured = false; 
-                } 
-                // checks if pressed key is part of option controlls
-                else if (allowed_options.includes(e.key)){
-                    this.key = e.key;
-                }
-                else if (e.key === 'Backspace' && backspace_enabled){
-                    this.key = e.key;
-                }
+        window.addEventListener('keydown', this.handleKeyDown.bind(this));
+    }
+    handleKeyDown(e){
+        e.preventDefault(); // prevents scrolling from occuring
+        if (mvmt_occured && e.key != this.key){  // prevents mvmt from registring before older mvmt was applied
+            if (allowed_mvmt.includes(e.key)){
+                this.key = e.key;
+                mvmt_occured = false; 
+            } 
+            else if (allowed_options.includes(e.key)){
+                this.key = e.key;
             }
-        });
+            else if (e.key === 'Backspace' && backspace_enabled){ //Backspace only enabled after ESC was pressed
+                this.key = e.key;
+            }
+        }
     }
 }
 
@@ -113,19 +114,17 @@ class Snake {
 
 // Food is the class of items spawned in the game
 class Food {
-    constructor(snake){
-        let spawned = false;
-        // Loops until food is spawned outside of snake body array
-        while (spawned == false){
-            this.x = Math.floor(Math.random() * (canvas.width - GAME_SIZE) / GAME_SIZE) * GAME_SIZE;
-            this.y = Math.floor(Math.random() * (canvas.height - GAME_SIZE) / GAME_SIZE) * GAME_SIZE;
-            // Condition to check if item was spawned at a snake body position
-            if (!snake.body.find(entry => (entry.x === this.x && entry.y === this.y))){
-                spawned = true;
-            }
-        }
+    constructor(snake = {body: []}){
         this.width = GAME_SIZE;
         this.height = GAME_SIZE;
+        this.spawnFood(snake);
+    }
+    spawnFood(snake){
+        // Constructs food while ensuring food never spawns on a pixel where the snake body is
+        do {
+            this.x = Math.floor(Math.random() * (canvas.width - GAME_SIZE) / GAME_SIZE) * GAME_SIZE;
+            this.y = Math.floor(Math.random() * (canvas.height - GAME_SIZE) / GAME_SIZE) * GAME_SIZE;
+        } while (snake.body.find(entry => (entry.x === this.x && entry.y === this.y)));
     }
     draw(context){
         context.fillStyle = 'white';
@@ -134,16 +133,25 @@ class Food {
 };
 
 
+// initalizes classes
+const input = new InputHandler();
+let snake = new Snake(CANVAS_WIDTH, CANVAS_HEIGHT);
+let food = new Food(snake);
+
+
 // Function for sending Score to Backend
-function sendInfo() {
-    const request = new XMLHttpRequest()
-    request.open('POST', `/process/${JSON.stringify(score)}`)
-    request.onload = () => {
-        const flaskMessage = request.responseText
-        console.log(flaskMessage)
+async function sendInfo() {
+    try {
+        const response = await fetch(`/process/${JSON.stringify(score)}`, {
+            method: 'POST'
+        });
+        const flaskMessage = await response.text();
+        console.log(flaskMessage);
+    } catch (error) {
+        console.error(error);
     }
-    request.send()
-};
+}
+
 
 // Function for toggeling elements on and off
 function Hide(elementid, toggle) {
@@ -152,56 +160,77 @@ function Hide(elementid, toggle) {
 };
 
 
-const input = new InputHandler();
-let snake = new Snake(CANVAS_WIDTH, CANVAS_HEIGHT);
-let food = new Food(snake);
-let counter = 0;
-let stats = 0;
-
-
 // Enables Game Over window & resets score
 function game_over(){
+    game_lost = true;
     sendInfo();
     Hide("button_go", false);
     document.getElementById("score").innerHTML = 0; // changes score on html side
 }
 
 
+// function for animation-loop
 async function animate(){
+    if (game_lost) {
+        return;
+    }
     if (counter % game_speed == 0){
-        // Condition to enable Pause-function
-        if (input.key == 'Escape'){
-            Hide("button_pa", false);
-            backspace_enabled = true;
-        }
-        // Condition for going back to main Menu
-        else if (input.key === 'Backspace'){
-            end_game();
-            return;
-        }
-        else if (allowed_mvmt.includes(input.key)){
-            backspace_enabled = false; // disables backspace for jumping to main menu
-            Hide("button_pa", true); // hides pause button
-            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            snake.draw(ctx);
-            food.draw(ctx);
-            // Checks if snake touches Food
-            if (snake.check_contact(food)){
-                food = new Food(snake);
-                food.draw(ctx);
-                snake.body.push(snake.body[snake.body.length -1]) // Increase Body of Snake
-            }
-            snake.update(input);
-            // Check if Snake Head touches Body
-            if (snake.fail_condition()){
-                game_over();
-                return;
-            }
-        }
+        handleGameLogic();
     }
     counter++;
     requestAnimationFrame(animate);
 };
+
+
+// function for handeling Game Logic
+function handleGameLogic(){
+    switch (input.key){
+        // Condition to enable Pause-function
+        case 'Escape':
+            Hide("button_pa", false);
+            backspace_enabled = true;
+            break;
+        // Condition for allowing Main Meun access
+        case 'Backspace':
+            end_game();
+            break;
+        default:
+            if (allowed_mvmt.includes(input.key)){
+                backspace_enabled = false; // disables backspace for jumping to main menu
+                Hide("button_pa", true); // hides pause button
+                ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+                snake.draw(ctx);
+                food.draw(ctx);
+                // Checks if snake touches Food
+                if (snake.check_contact(food)){
+                    food = new Food(snake);
+                    food.draw(ctx);
+                    snake.body.push(snake.body[snake.body.length -1]) // Increase Body of Snake
+                }
+                snake.update(input);
+                // Check if Snake Head touches Body
+                if (snake.fail_condition()){
+                    game_over();
+                }
+            }
+    }
+}
+
+
+// function for resetting all values before starting a new game
+function reset(){
+    input.key = ''; // resets value of event handler
+    mvmt_occured = true;
+    snake = new Snake(CANVAS_WIDTH, CANVAS_HEIGHT);
+    food = new Food(snake);
+    game_lost = false; // reset game state
+    counter = 0;
+    score = 0;
+    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); // clears canvas (If Game was run before)
+    snake.draw(ctx); // Draws objects before animation loop is started
+    food.draw(ctx); // Draws objects before animation loop is started
+}
+
 
 // Main function for running the game
 function run_game(){
@@ -212,17 +241,14 @@ function run_game(){
     // Display Canvas
     Hide("div_canvas", false);
     // initalizes classes and objects
-    input.key = ''; // resets value of event handler
-    snake = new Snake(CANVAS_WIDTH, CANVAS_HEIGHT);
-    food = new Food(snake);
-    counter = 0;
-    score = 0;
+    reset();
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); // clears canvas (If Game was run before)
     snake.draw(ctx); // Draws objects before animation loop is started
     food.draw(ctx); // Draws objects before animation loop is started
     // starts main game loop
     animate();
 };
+
 
 // Function for Handeling end of a Game
 function end_game(){
@@ -232,5 +258,6 @@ function end_game(){
     // disable canvas and pause button
     Hide("div_canvas", true);    
     Hide("button_pa", true);
+    game_lost = true;
     document.getElementById("score").innerHTML = 0; // changes score on html side
 };
