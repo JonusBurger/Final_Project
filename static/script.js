@@ -3,7 +3,8 @@ const ctx = canvas.getContext('2d');
 const CANVAS_WIDTH = canvas.width = 400;
 const CANVAS_HEIGHT = canvas.height = 400;
 const GAME_SIZE = 10; // Defines sizes of Object in the game
-let game_speed = 10; // Defines Game_speed
+const SONG = "static/mixkit-deep-urban-623.mp3"; // Name of song to be played
+let game_speed = 4; // Defines Game_speed
 let score = 0; // stores the Score for the current game 
 let counter = 0; // Keeps track of current Frame
 let mvmt_occured = true; // variable storing if a mvmt was applied or not
@@ -11,6 +12,7 @@ let backspace_enabled = false; // this is used in order to enable going back to 
 let game_lost = false;
 const allowed_mvmt = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight']; // Defines mvmt controlls
 const allowed_options = ['Escape']; // Defines option controlls
+
 
 // Handler Listening for User-Input
 class InputHandler {
@@ -231,6 +233,11 @@ function reset(){
     food.draw(ctx); // Draws objects before animation loop is started
 }
 
+function play_music(){
+    let music = new Audio(SONG);
+    music.play();
+}
+
 
 // Main function for running the game
 function run_game(){
@@ -240,6 +247,7 @@ function run_game(){
     Hide("button_ch", true);
     // Display Canvas
     Hide("div_canvas", false);
+    play_music();
     // initalizes classes and objects
     reset();
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); // clears canvas (If Game was run before)
